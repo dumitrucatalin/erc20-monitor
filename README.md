@@ -5,9 +5,9 @@ It allows you to monitor a list of ERC-20 tokens and listen to transfer events i
 
 ## Features
 
-- **Token Balance Monitoring**: Continuously fetches and updates balances for a specified list of ERC-20 tokens for a wallet address.
+- **Token Balance Monitoring**: Continuously fetches and updates balances for a specified list of ETH and ERC-20 tokens for a wallet address.
 - **Event Listener**: Listens to ERC-20 `Transfer` events to capture real-time updates for each token.
-- **Ethereum Blockchain**: Leverages the Ethereum blockchain to retrieve ERC-20 token data and event logs.
+- **Ethereum Blockchain**: Leverages the Ethereum blockchain to retrieve ETH or ERC-20 token data and event logs.
 - **Efficiency**: Uses web3 and ethers.js libraries for efficient interaction with the blockchain.
 
 ## Prerequisites
@@ -22,5 +22,5 @@ It allows you to monitor a list of ERC-20 tokens and listen to transfer events i
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/your-username/erc20-monitor.git
+   git clone https://github.com/dumitrucatalin/erc20-monitor.git
    cd erc20-monitor
