@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import * as dotenv from 'dotenv';
 import { ERC20_ABI } from './constants';
+import { fetchERC20Tokens, TokenData } from './tokens';
 dotenv.config();
 
 
@@ -13,17 +14,13 @@ if (!monitoredAddress) {
     throw new Error('Please set the MONITORED_ADDRESS in your .env file');
 }
 
-interface Token {
-    address: string;
-    symbol: string;
-    decimals: number;
-}
-
-const tokens: Token[] = [
+// If you want to bypass the coingeko fetch due to rate limits, you ca store the contracts here.
+// If you add other chain contracts like ARB, please update the RPC for an ARB one.
+const tokens: TokenData[] = [
     // Add the tokens you want to monitor here
     // These are from ETH Mainnet
-    { address: '0x57e114B691Db790C35207b2e685D4A43181e6061', symbol: 'ENA', decimals: 18 },
-    { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', symbol: 'USDT', decimals: 6 },
+    { contractAddress: '0x57e114B691Db790C35207b2e685D4A43181e6061', symbol: 'ENA', decimals: 18 },
+    { contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7', symbol: 'USDT', decimals: 6 },
     // ...
 ];
 
@@ -48,10 +45,10 @@ async function getTokenBalance(contract: ethers.Contract, address: string, decim
     return ethers.formatUnits(balance, decimals);
 }
 
-async function monitorTokens() {
+async function monitorTokens(tokens: TokenData[]) {
     for (const token of tokens) {
         try {
-            const tokenContract = new ethers.Contract(token.address, ERC20_ABI, provider);
+            const tokenContract = new ethers.Contract(token.contractAddress, ERC20_ABI, provider);
             const balance = await getTokenBalance(tokenContract, monitoredAddress!, token.decimals);
             console.log(`Balance of ${token.symbol} for ${monitoredAddress}: ${balance}`);
         } catch (error) {
@@ -60,11 +57,11 @@ async function monitorTokens() {
     }
 }
 
-function listenForERC20TokenTransfers() {
+function listenForERC20TokenTransfers(tokens: TokenData[]) {
+    console.log(`Start listening for Incoming ERC-20 tokens transaction`);
     for (const token of tokens) {
-
         try {
-            const tokenContract = new ethers.Contract(token.address, ERC20_ABI, provider);
+            const tokenContract = new ethers.Contract(token.contractAddress, ERC20_ABI, provider);
 
             // Listen for Transfer events
             tokenContract.on('Transfer', (from: string, to: string, value: ethers.BigNumberish) => {
@@ -124,10 +121,12 @@ function listenForEthTransfers() {
 
 export async function startMonitoring() {
     try {
+        // Uncomment for Congecko tokens fetching.
+        // const tokens = await fetchERC20Tokens();
         console.log(`Monitoring ERC-20 tokens for address: ${monitoredAddress}`);
         await checkEthBalance(monitoredAddress!);
-        await monitorTokens();
-        listenForERC20TokenTransfers();
+        await monitorTokens(tokens);
+        listenForERC20TokenTransfers(tokens);
         listenForEthTransfers();
     } catch (error) {
         console.error(error)
